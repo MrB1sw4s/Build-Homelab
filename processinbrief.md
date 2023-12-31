@@ -20,13 +20,18 @@ after installing Ubuntu we have to configure our storage. we will use the rest o
 	start by partitioning the disks 
 locate disks
 >$lsblk
+
 then partition using fdisk
 >$sudo fdisk /dev/sda
+
 >m
+
 (will use gpt partition)
 >g
+
 and then use the whole disks by pressing enter, then save and exit with:
 >w
+
 partition all the drives you want to merge like this
 
 check the partitions
@@ -34,30 +39,44 @@ check the partitions
 
 create filesystem. I will use ext4
 >$sudo mkfs.ext4 /dev/sda1
+
 do the same for all drive partition
 
 now create a mount point for disks. I'll use /mnt
 >$cd /mnt
+
 >$ll
+
 >$sudo mkdir sda1 sdb1 (as per your disk layout)
+
 now add disk and mount point to fstab to ensure disk will be mounted each time we boot up the server
 >$sudo nano /etc/fstab
+
 add:
 >/dev/sda1 /mnt/sda1 auto nosuid,nodev,nofail,x-gvfs-show 0 0
+
 >/dev/sdb1 /mnt/sdb1 auto nosuid,nodev,nofail,x-gvfs-show 0 0
+
 now ctrl o ctrlx for save and exit
 >$sudo mount -a
+
 now change owner to users
 >$sudo chown username:username
 
 now we will install and configure mergerfs
 >$sudo apt update && sudo apt install mergerfs -y
+
 >$cd /mnt
+
 >$sudo mkdir myfiles (our merged file will be inside of it)
+
 >$sudo mergerfs -o allow_other,use_ino,cache.files=off,dropcacheonclose=true,category.create=mfs,fsname=myfiles /mnt/sda1:/mnt/sdb1 /mnt/myfiles/
+
 >$sudo nano /etc/fstab
+
 add:
 >/mnt/sda1:/mnt/sdb1 /mnt/myfiles fuse.mergerfs allow_other,use_ino,cache.files=off,dropcacheonclose=true,category.create=mfs,fsname=myfiles,nonempty,x-gvfs-show 0 0
+
 save and exit
 >$sudo mount -a
 
@@ -67,58 +86,90 @@ now we will install nextcloud. a good opensource fileserver.
 
 Install Apache web server by using the below command
 >$sudo apt install apache2
+
 Check the status of the Apache web server
 >$systemctl status apache2
+
 Install php and dependencies
 >$sudo apt-get install php8.1 php8.1-cli php8.1-common php8.1-imap php8.1-redis php8.1-snmp php8.1-xml php8.1-zip php8.1-mbstring php8.1-curl php8.1-gd php8.1-mysql
+
 Install MariaDB server
 >$sudo apt install mariadb-server
+
 Check the status of MariaDB
 >$systemctl status mariadb
 
 Create a database and grant privileges to the user
 >$mysql
+
 >CREATE DATABASE nextcloud;
+
 >GRANT ALL PRIVILEGES ON nextcloud.* TO 'nextcloud'@'localhost' IDENTIFIED BY 'password';
+
 >FLUSH PRIVILEGES;
+
 >exit;
+
 Change into html directory
 >$cd /var/www/html
+
 Download the nextcloud by using the wget command
 >$sudo wget https://download.nextcloud.com/server/releases/nextcloud-24.0.1.zip
+
 (used this old version. new one has a better ui but I faced some issues)
 
 Extract the file using the unzip command
 >$sudo unzip nextcloud-24.0.1.zip
+
 Change the ownership of the file 
 >$vim /etc/apache2/sites-available/nextcloud.conf
+
 Paste the following lines in the file and save the file
 ><VirtualHost *:80>
+
 >ServerName yourdomain.com
+
 >DocumentRoot /var/www/html/nextcloud
+
 ><Directory /var/www/html/nextcloud/>
+
 > Require all granted
+
 > Options FollowSymlinks MultiViews
+
 > AllowOverride All
+
 > <IfModule mod_dav.c>
+
 > Dav off
+
 > </IfModule>
+
 ></Directory>
+
 >ErrorLog /var/log/apache2/yourdomain.com.error_log
+
 >CustomLog /var/log/apache2/yourdomain.com.access_log common
+
 ></VirtualHost>
 
 Enable the Apache2 configuration file 
 >$sudo a2ensite nextcloud.conf
+
 Enable the Apache2 Module
 >$sudo a2enmod rewrite
+
 Disable the Apache default welcome page 
 >$sudo a2dissite 000-default.conf
+
 >$sudo systemctl reload apache2
+
 Check the syntax of conf file
 >$sudo apachectl -t
+
 Restart the Apache web server
 >systemctl restart apache2
+
 
 Open the browser and search with IP the web interface will be shown. the username and passewd will be the admin account
 data folder. set the path to the merged storage
@@ -130,6 +181,7 @@ now after installation you will be greeted by the nextcloud admin panel. you can
 as per local file upload and sync I faced a lot of problem. but with this installation you will see nextcloud/data folder in the merged storage.
 you can store files locally there and for syncing those data, you have to find a file named occ inside /var/www/html/nextcloud, or according to your installation location then
 >$sudo occ files:scan --all
+
 all database will be scanned and synced with web interface
 
 
@@ -145,6 +197,7 @@ Use the apt package manager to install cloudflared on compatible machines.
 Add Cloudflare’s package signing key:
 
 >$sudo mkdir -p --mode=0755 /usr/share/keyrings
+
 >$curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
 
 Add Cloudflare’s apt repo to your apt repositories:
@@ -153,6 +206,7 @@ Add Cloudflare’s apt repo to your apt repositories:
 
 Update repositories and install cloudflared:
 >$sudo apt-get update && sudo apt-get install cloudflared
+
 Authenticate cloudflared
 
 >$cloudflared tunnel login
@@ -180,7 +234,9 @@ In your .cloudflared directory, create a config.yml file using any text editor. 
 Add the following fields to the file:
 
 >tunnel: <Tunnel-UUID>
+
 >credentials_file: /root/.cloudflared/<Tunnel-UUID>.json
+
 >ingress:
 >  - hostname: subdomain.domain.com
 >    service: http://192.168.40.244:80
@@ -192,6 +248,7 @@ Now assign a CNAME record that points traffic to your tunnel subdomain:
 Confirm that the route has been successfully established:
 
 >$cloudflared tunnel route IP show
+
 Run the tunnel to proxy incoming traffic from the tunnel to any number of services running locally on your origin.
 
 >$cloudflared tunnel run <UUID or NAME>
@@ -205,8 +262,10 @@ You can now route traffic to your tunnel using Cloudflare DNS or determine who c
 Now you probably don’t want to have to manually run the service every time so we can configure the service to start automatically.
 Install service
 >$cloudflared service install
+
 Start service
 >$systemctl start cloudflared
+
 Enable service
 >$systemctl enable cloudflared
 
@@ -218,7 +277,9 @@ ok ok i get it this really sounds cool. but seems hard ain't it? NOPE. it's easy
 i installed qemu/kvm virtualmanager on ubuntu host and assigned one core and 2 gb ram to a debian virtual machine and set it to boot on startup. 
 to install vitualmanager
 >$sudo apt install virt-manager
+
 >$sudo virt-manager
+
 if you are fammilar with virtualbox you surely can install a vm here. I trust you. <3
 after setting up your vm, and getting debian running, let's host our dark web
 
@@ -296,23 +357,33 @@ after installation we will install x11vnc. rest vncs are bad.
 
 Copy and paste these commands - change the password
 >[Unit]
+
 >Description=x11vnc service
+
 >After=display-manager.service network.target syslog.target
 >
 >[Service]
+
 >Type=simple
+
 >ExecStart=/usr/bin/x11vnc -forever -display :0 -auth guess -passwd password
+
 >ExecStop=/usr/bin/killall x11vnc
+
 >Restart=on-failure
 >
 >[Install]
+
 >WantedBy=multi-user.target
 
 Save file and run these commands:
 
 >$systemctl daemon-reload
+
 >$systemctl enable x11vnc.service
+
 >$systemctl start x11vnc.service
+
 >$sudo systemctl status x11vnc.service
 
 last command will give us the port on which the process is running. its by default 5900
@@ -323,7 +394,9 @@ do same configuration as before.
 the config.yml file should look like this>
 
 >tunnel: <NAME>
+
 >ingress:
+
 >- hostname: subdomain.domain.com
 >  service: tcp://localhost:5900
 >- service: http_status:404
