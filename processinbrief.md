@@ -180,7 +180,7 @@ now after installation you will be greeted by the nextcloud admin panel. you can
 
 as per local file upload and sync I faced a lot of problem. but with this installation you will see nextcloud/data folder in the merged storage.
 you can store files locally there and for syncing those data, you have to find a file named occ inside /var/www/html/nextcloud, or according to your installation location then
->$sudo occ files:scan --all
+>$sudo -u www-data php occ files:scan --all
 
 all database will be scanned and synced with web interface
 
