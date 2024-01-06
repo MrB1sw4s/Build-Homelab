@@ -62,7 +62,7 @@
     toggleCheckbox.checked = initialServerState === 'On';
     if (initialServerState === 'On'){
         warning.style.display = 'block'
-        fade(18000);
+        fade(180000);
 
     }
     if(initialServerState == 'Off_fade'){
@@ -90,14 +90,14 @@
             toggleCheckbox.checked = true;
             server_state = 'already_on'
             warning.style.display = 'block';
-            //fade(18000);
+            //fade(180000);
         }
     } else {
         // If the toggle is going from "off" to "on", simply update the status and toggle value
         toggleCheckbox.checked = true;
         server_state = 'On';
         warning.style.display = 'block';
-        fade(18000);
+        fade(180000);
         toggleValue.textContent = server_state;
     }
 
@@ -155,7 +155,7 @@
             fade(60000);
         }else{
             warning.style.display = 'block';
-            fade(18000);
+            fade(180000);
         }
 
         toggleValue.textContent = receivedStatus;
