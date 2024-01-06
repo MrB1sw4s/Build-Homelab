@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+    <div class="navbar">
+        <a href = "/logout">
+            <span class="material-symbols-outlined">
+                logout
+            </span>
+        </a>
+    </div>
+
+ <div class="server-controls">
+    <h1>Welcome {{current_user.username}}</h1>
+    <h1>Control Panel</h1>
+    <h2>Server on / off switch</h2>
+    <div class="switch" id="toggleSwitch">
+        <input type="checkbox" id="toggleCheckbox">
+        <span class="slider"></span>
+    </div>
+    <span id="toggleValue" style="display: none;">Off</span>
+    <div id="warning" style="display: none;">
+        <p>The server is on.</p>
+        <p>The server will be up and running in 2 minutes.</p>
+	<p>Note: For the Hardware security, the server can't be turned off Within 3 minutes after powering up.</p>
+    </div>
+    <br>
+    <br>
+    <div class="buttons">
+      <button id="button-1">File Server</a></button>
+      <button id="button-2">Dark Web</a></button>
+      <button id="button-3">Attack Box</a></button>
+      <button id="button-4">Media Server</a></button>
+    </div>
+ </div>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+ <script>
+   document.getElementById("button-1").onclick = function() {
+        window.open('https://fileserver.mrb1sw4sweb.online/','_blank');
+    };
+    document.getElementById("button-2").onclick = function() {
+        window.open('/darkweb','_blank');
+    };
+    document.getElementById("button-3").onclick = function() {
+        window.open('https://attackbox.mrb1sw4sweb.online','_blank');
+    };
+    document.getElementById("button-4").onclick = function() {
+        window.open('https://plex.mrb1sw4sweb.online','_blank');
+    };
+    const toggleSwitch = document.getElementById('toggleSwitch');
+    const toggleCheckbox = document.getElementById('toggleCheckbox');
+    const toggleValue = document.getElementById('toggleValue');
+    const warning = document.getElementById('warning')
+    //let server_state = 'off';
+    const socket = io.connect();
+    const initialServerState = '{{ server_state }}';
+    console.log(initialServerState);
+    toggleCheckbox.checked = initialServerState === 'On';
+    if (initialServerState === 'On'){
+        warning.style.display = 'block'
+        fade(18000);
+
+    }
+    if(initialServerState == 'Off_fade'){
+        warning.style.display = 'none';
+        fade(60000);
+    }
+    server_state = initialServerState;
+    toggleValue.textContent = initialServerState;
+ 
+    toggleSwitch.onclick = function() {
+    //console.log(toggleCheckbox.checked);
+
+    if (toggleCheckbox.checked) {
+        // Display a confirmation popup
+        const userConfirmed = confirm("Warning: You are about to Power off the server. You can't Power On within 1 minute of Powering Off. Are you sure?");
+
+        if (userConfirmed) {
+            toggleCheckbox.checked = false;
+            server_state = 'Off_fade';
+            warning.style.display = 'none'
+            fade(60000);
+            toggleValue.textContent = server_state;
+        } else {
+            // If the user cancels, keep the toggle "on"
+            toggleCheckbox.checked = true;
+            server_state = 'already_on'
+            warning.style.display = 'block';
+            //fade(18000);
+        }
+    } else {
+        // If the toggle is going from "off" to "on", simply update the status and toggle value
+        toggleCheckbox.checked = true;
+        server_state = 'On';
+        warning.style.display = 'block';
+        fade(18000);
+        toggleValue.textContent = server_state;
+    }
+
+    //console.log(server_state);
+    // if (server_state === "Off") {
+    //     warning.style.display = 'none';
+    // } else {
+    //     warning.style.display = 'block';
+    // }
+    if(server_state != 'already_on'){
+        send_status(server_state);
+        socket.emit('status_update', { status: server_state });
+    }
+};
+
+    function send_status(status){
+        console.log("I got called")
+        
+        fetch('/status',{
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json'
+            },
+            body:JSON.stringify({ status:status })
+        })
+        .then(response => response.json())
+        .then(data=>{
+            console.log('Server Response: ',data);
+        })
+        .catch(error=>{
+            console.error('Error:', error);
+        });
+    }
+
+    function fade(time){
+        var element = document.querySelector('.switch');
+        setTimeout(function(){
+            //console.log('fade stopped');
+            element.classList.remove('fade');
+            
+        }, time);
+
+        //console.log('fade started');
+        element.classList.add('fade');
+
+    }
+
+    socket.on('status_update',function(data){
+        const receivedStatus = data.status;
+        toggleCheckbox.checked = receivedStatus === 'On';
+        server_state = receivedStatus;
+
+        if(receivedStatus === 'Off_fade'){
+            warning.style.display = 'none';
+            fade(60000);
+        }else{
+            warning.style.display = 'block';
+            fade(18000);
+        }
+
+        toggleValue.textContent = receivedStatus;
+
+    });
+ </script>
+</body>
+</html>

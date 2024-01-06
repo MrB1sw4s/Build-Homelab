@@ -1,0 +1,4 @@
+Flask-SQLAlchemy
+Flask-Login
+Flask-Bcrypt
+Flask-SocketIO
