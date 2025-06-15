@@ -57,23 +57,21 @@ A bare-metal homelab project built from scratch using an Intel i5 server and Ras
 
 ## 🌐 Architecture Snapshot
 
-Raspberry Pi (Remote Controller)
-├── Flask Web App (GPIO-based Relay)
-│   ├── PSU Relay (Power ON/OFF)
-│   └── Motherboard Boot Trigger
-
-Main Server (Ubuntu 22.04)
-├── Virtual Machines (via KVM)
-│   ├── ParrotSec (HTB Edition)
-│   │   └── x11vnc → Cloudflare Tunnel → Browser (Zero Trust Access)
-│   └── Debian VM
-│       └── NGINX + Tor → .onion Dark Web Site
-├── Fileserver
-│   └── Nextcloud (Apache + MariaDB + PHP)
-│       └── Mounted on MergerFS (sda1 + sdb1)
-└── Cloudflare Tunnels
-    ├── HTTPS Access to Fileserver
-    └── TCP Forwarding to ParrotSec VNC
+- **Raspberry Pi (Remote Controller)**
+  - Flask Web App (Relay GPIO Control)
+    - PSU Relay (Power ON/OFF)
+    - Motherboard Trigger (Boot/Shut)
+  
+- **Main Server (Ubuntu 22.04)**
+  - **Virtual Machines**
+    - ParrotSec (HTB Edition)
+      - x11vnc + Cloudflare Tunnel (Browser-Based Access)
+    - Debian (Tor + NGINX → Onion Hosting)
+  - **File Server**
+    - Nextcloud + Apache + MariaDB on MergerFS (sda1 + sdb1)
+  - **Cloudflare Tunnels**
+    - HTTPS → Nextcloud Web UI
+    - TCP → VNC over Browser
 
 ---
 
