@@ -4,7 +4,7 @@ A bare-metal homelab project built from scratch using an Intel i5 server and Ras
 
 ---
 
-## 🏗️ Overview
+##  Overview
 
 - **Fileserver with Nextcloud**, hosted on RAID-like merged disks (via mergerfs)
 - **Dark web server**, hosted via Tor hidden service in a Debian VM
@@ -13,7 +13,7 @@ A bare-metal homelab project built from scratch using an Intel i5 server and Ras
 
 ---
 
-## ⚙️ Tech Stack
+##  Tech Stack
 
 | Component      | Stack Used                                     |
 |----------------|------------------------------------------------|
@@ -28,7 +28,7 @@ A bare-metal homelab project built from scratch using an Intel i5 server and Ras
 
 ---
 
-## 🛠️ Hardware Used
+##  Hardware Used
 
 - **Main Server**: i5-7600, 8 GB RAM, 256 GB NVMe, 1.5 TB HDD
 - **Raspberry Pi**: Used for relay-based remote boot control
@@ -36,7 +36,7 @@ A bare-metal homelab project built from scratch using an Intel i5 server and Ras
 
 ---
 
-## 💡 Use Cases
+##  Use Cases
 
 - Fully private self-hosted cloud (Nextcloud) with public access via domain
 - Red/Blue team lab with persistent attack VM
@@ -46,7 +46,7 @@ A bare-metal homelab project built from scratch using an Intel i5 server and Ras
 
 ---
 
-## 🛡️ Security Notes
+##  Security Notes
 
 - Fileserver isolated from WAN using Cloudflare tunneling
 - Onion services fully segmented within VM sandbox
@@ -55,7 +55,7 @@ A bare-metal homelab project built from scratch using an Intel i5 server and Ras
 
 ---
 
-## 🌐 Architecture Snapshot
+##  Architecture Snapshot
 
 - **Raspberry Pi (Remote Controller)**
   - Flask Web App (Relay GPIO Control)
@@ -75,7 +75,7 @@ A bare-metal homelab project built from scratch using an Intel i5 server and Ras
 
 ---
 
-## 🧠 Challenges Overcome
+##  Challenges Overcome
 
 - Merged storage management via `mergerfs` for live cloud sync
 - Full Nextcloud deployment with MariaDB + Apache config
@@ -85,9 +85,9 @@ A bare-metal homelab project built from scratch using an Intel i5 server and Ras
 
 ---
 
-## 🔗 Extras
+##  Extras
 
-- ⚡ Onion site hosting fully operational inside VM
-- 🛠️ Public access to file server via registered domain + Cloudflare
-- 💥 ParrotSec VNC rendered inside browser (no Chrome!)
+-  Onion site hosting fully operational inside VM
+-  Public access to file server via registered domain + Cloudflare
+-  ParrotSec VNC rendered inside browser (no Chrome!)
 
